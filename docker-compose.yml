@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: insurance
+      POSTGRES_USER: insurance
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-insurance}
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U insurance -d insurance"]
+      interval: 5s
+      retries: 20
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/insurance
+      DB_USERNAME: insurance
+      DB_PASSWORD: ${DB_PASSWORD:-insurance}
+      JWT_SECRET: ${JWT_SECRET:-change-me-this-is-a-dev-only-secret-of-at-least-32-bytes!!}
+      CORS_ORIGINS: http://localhost:3000
+    ports: ["8080:8080"]
+    depends_on:
+      db: { condition: service_healthy }
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+    depends_on: [backend]
+volumes:
+  pgdata:
