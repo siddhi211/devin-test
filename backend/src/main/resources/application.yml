@@ -1,0 +1,51 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: insurance-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/insurance}
+    username: ${DB_USERNAME:insurance}
+    password: ${DB_PASSWORD:insurance}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          batch_size: 20
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-this-is-a-dev-only-secret-of-at-least-32-bytes!!}
+    ttl-minutes: ${JWT_TTL_MINUTES:480}
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3000}
+  security:
+    max-failed-logins: 5
+  batch:
+    scheduler-enabled: ${BATCH_SCHEDULER_ENABLED:true}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.legacyins: INFO
