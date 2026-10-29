@@ -50,7 +50,12 @@ public class PremiumService {
     public QuoteResult quote(QuoteRequest r, String actor, boolean log) {
         Product p = products.findById(r.productId()).orElseThrow(() -> ApiException.notFound("Product", r.productId()));
         List<String> errors = new ArrayList<>();
-        if (r.dateOfBirth() == null) {
+        LocalDate dob = r.dateOfBirth();
+        if (dob == null && r.customerId() != null) {
+            dob = jdbc.query("SELECT date_of_birth FROM customer WHERE customer_id = ?",
+                    rs -> rs.next() ? rs.getObject(1, LocalDate.class) : null, r.customerId());
+        }
+        if (dob == null) {
             errors.add("dateOfBirth is required");
         }
         if (r.sumInsured() == null || r.sumInsured().signum() <= 0) {
@@ -66,7 +71,7 @@ public class PremiumService {
         }
         int installments = installmentsPerYear(freq);
         LocalDate start = r.startDt() == null ? LocalDate.now() : r.startDt();
-        int age = Period.between(r.dateOfBirth(), start).getYears();
+        int age = Period.between(dob, start).getYears();
         int term = r.termMonths() == null ? p.getMinTermMonths() : r.termMonths();
 
         List<String> eligibility = new ArrayList<>();

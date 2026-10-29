@@ -47,7 +47,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleIntegrity(DataIntegrityViolationException ex) {
         log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
-        return build(ErrorCode.DUPLICATE, "Data integrity violation: " + ex.getMostSpecificCause().getMessage(), List.of());
+        String msg = ex.getMostSpecificCause().getMessage();
+        boolean unique = ex.getMostSpecificCause() instanceof java.sql.SQLException sql && "23505".equals(sql.getSQLState());
+        return build(unique ? ErrorCode.DUPLICATE : ErrorCode.VALIDATION, "Data integrity violation: " + msg, List.of());
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

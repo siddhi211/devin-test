@@ -32,7 +32,7 @@ public class Customer {
     private String createdBy;
     private LocalDateTime updatedDt;
     private String riskClass = "STD";
-    private String segment;
+    private String segment = "RETAIL";
     private String normName;
     private String normNid;
     private Long mergedIntoId;
